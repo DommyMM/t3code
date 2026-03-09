@@ -54,6 +54,16 @@ describe("resolveThreadActivityAt", () => {
       }),
     ).toBe("2026-03-09T10:00:00.000Z");
   });
+
+  it("falls back to createdAt when updatedAt is invalid", () => {
+    expect(
+      resolveThreadActivityAt({
+        id: "thread-1" as never,
+        createdAt: "2026-03-09T10:00:00.000Z",
+        updatedAt: "not-a-date",
+      }),
+    ).toBe("2026-03-09T10:00:00.000Z");
+  });
 });
 
 describe("compareThreadsByRecentActivity", () => {
@@ -68,6 +78,42 @@ describe("compareThreadsByRecentActivity", () => {
         id: "thread-2" as never,
         createdAt: "2026-03-09T09:00:00.000Z",
         updatedAt: "2026-03-09T10:05:00.000Z",
+      },
+    ];
+
+    expect(threads.toSorted(compareThreadsByRecentActivity).map((thread) => thread.id)).toEqual([
+      "thread-2",
+      "thread-1",
+    ]);
+  });
+
+  it("sorts a valid activity timestamp ahead of an invalid one", () => {
+    const threads = [
+      {
+        id: "thread-1" as never,
+        createdAt: "not-a-date",
+      },
+      {
+        id: "thread-2" as never,
+        createdAt: "2026-03-09T10:05:00.000Z",
+      },
+    ];
+
+    expect(threads.toSorted(compareThreadsByRecentActivity).map((thread) => thread.id)).toEqual([
+      "thread-2",
+      "thread-1",
+    ]);
+  });
+
+  it("sorts two invalid timestamps by id as a stable fallback", () => {
+    const threads = [
+      {
+        id: "thread-1" as never,
+        createdAt: "not-a-date",
+      },
+      {
+        id: "thread-2" as never,
+        createdAt: "still-not-a-date",
       },
     ];
 

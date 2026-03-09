@@ -29,9 +29,12 @@ function parseIsoDate(value: string | undefined): number {
 }
 
 export function resolveThreadActivityAt(thread: ThreadActivityInput): string {
-  const updatedAtMs = parseIsoDate(thread.updatedAt);
-  if (!Number.isNaN(updatedAtMs)) {
-    return thread.updatedAt as string;
+  const { updatedAt } = thread;
+  if (updatedAt) {
+    const updatedAtMs = parseIsoDate(updatedAt);
+    if (!Number.isNaN(updatedAtMs)) {
+      return updatedAt;
+    }
   }
   return thread.createdAt;
 }
